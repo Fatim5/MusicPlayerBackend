@@ -3,8 +3,10 @@ package com.music.music_player.controller;
 import com.music.music_player.dto.requests.ArtisteRequestDTO;
 import com.music.music_player.dto.responses.ArtisteResponseDTO;
 import com.music.music_player.services.interfaces.ArtisteService;
+import com.music.music_player.storage.FileStorageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -14,9 +16,23 @@ import java.util.List;
 public class ArtisteController {
 
     private final ArtisteService artisteService;
+    private final FileStorageService fileStorageService;
 
-    @PostMapping
-    public ArtisteResponseDTO save(@RequestBody ArtisteRequestDTO dto) {
+    @PostMapping(
+            value = "/create",
+            consumes = {"multipart/form-data"}
+    )
+    public ArtisteResponseDTO createArtiste(
+            @RequestParam("nom") String nom,
+            @RequestParam("description") String description,
+            @RequestParam("image") MultipartFile image
+    ) {
+        String imageName = fileStorageService.storeFile(image, "images");
+
+        ArtisteRequestDTO dto = new ArtisteRequestDTO();
+        dto.setNom(nom);
+        dto.setDescription(description);
+        dto.setImage(imageName);
 
         return artisteService.saveArtiste(dto);
     }
